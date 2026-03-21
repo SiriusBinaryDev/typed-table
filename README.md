@@ -174,6 +174,7 @@ Vitest benchmark mode is experimental in the current toolchain, so keep the Vite
 ## Release Workflow
 
 - The repository uses Changesets for versioning and npm publication.
+- Pushing a version tag like `v0.2.2` now also creates a GitHub Release and publishes GitHub Packages mirror builds under the `@siriusbinarydev/*` scope.
 - Verify the workspace before a release:
 
 ```bash
@@ -200,7 +201,7 @@ npm run release:version
 npm run release:publish
 ```
 
-- See [docs/release.md](./docs/release.md) for the full release sequence and pre-release checks.
+- See [docs/release.md](./docs/release.md) for the full release sequence, the GitHub tag workflow, and the GitHub Packages mirror names.
 
 ## Roadmap
 
