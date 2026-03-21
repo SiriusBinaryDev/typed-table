@@ -1,17 +1,20 @@
 import type {
   ColumnDef,
   ColumnPinningState,
+  ColumnSizingState,
   GetRowId,
   RowSelectionState,
   TableCell,
   TableRow,
 } from "../types/index.js";
 
+import { getColumnSizingInfo } from "../columns/getColumnSizing.js";
 import { getColumnPinningPosition } from "../columns/getOrderedColumns.js";
 
 type CreateRowsOptions<TData> = {
   columns: readonly ColumnDef<TData>[];
   columnPinning?: ColumnPinningState | undefined;
+  columnSizing?: ColumnSizingState | undefined;
   rowSelection?: RowSelectionState | undefined;
   getRowId?: GetRowId<TData> | undefined;
 };
@@ -24,11 +27,19 @@ export function createRows<TData>(
     const rowId = options.getRowId?.(original, index) ?? String(index);
     const cells = options.columns.map<TableCell<TData>>((column) => {
       const value = column.accessor(original);
+      const { size, minSize, maxSize, canResize } = getColumnSizingInfo(
+        column,
+        options.columnSizing,
+      );
 
       return {
         id: `${rowId}:${column.id}`,
         columnId: column.id,
         pin: getColumnPinningPosition(column.id, options.columnPinning),
+        size,
+        minSize,
+        maxSize,
+        canResize,
         value,
         render: () =>
           column.cell

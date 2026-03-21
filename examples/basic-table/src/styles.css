@@ -137,7 +137,9 @@ button {
   text-underline-offset: 0.18em;
 }
 
-.basic-text-button:disabled {
+.basic-text-button:disabled,
+.basic-size-button:disabled,
+.basic-button:disabled {
   cursor: not-allowed;
   opacity: 0.45;
 }
@@ -171,11 +173,20 @@ button {
   color: #f7efe3;
 }
 
-.basic-chip-meta {
-  padding: 2px 8px;
+.basic-chip-meta,
+.basic-width-badge {
+  padding: 3px 8px;
   border-radius: 999px;
+  font-size: 0.7rem;
+}
+
+.basic-chip-meta {
   background: rgba(93, 61, 32, 0.12);
-  font-size: 0.74rem;
+}
+
+.basic-width-badge {
+  background: rgba(95, 67, 39, 0.08);
+  color: #6a5035;
 }
 
 .basic-chip.is-active .basic-chip-meta {
@@ -206,13 +217,48 @@ button {
   font-size: 1.7rem;
 }
 
+.basic-size-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.basic-size-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(102, 74, 42, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.basic-size-card-header,
+.basic-size-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.basic-size-actions {
+  justify-content: flex-start;
+}
+
+.basic-size-button {
+  border: 1px solid rgba(102, 74, 42, 0.16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(247, 239, 227, 0.9);
+  color: #5d3d20;
+}
+
 .basic-table-shell {
-  overflow: hidden;
+  overflow-x: auto;
 }
 
 .basic-table {
-  width: 100%;
+  width: max(100%, 760px);
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 .basic-table th,
@@ -220,6 +266,7 @@ button {
   padding: 16px 18px;
   text-align: left;
   border-bottom: 1px solid rgba(95, 67, 39, 0.1);
+  overflow-wrap: anywhere;
 }
 
 .basic-table thead th {
@@ -325,11 +372,6 @@ button {
   color: #f7efe3;
 }
 
-.basic-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
 .basic-page-indicator {
   color: #5d4e3e;
 }
@@ -348,7 +390,7 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .basic-table-shell {
-    overflow-x: auto;
+  .basic-size-grid {
+    grid-template-columns: 1fr;
   }
 }

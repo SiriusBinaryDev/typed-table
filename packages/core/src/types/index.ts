@@ -32,8 +32,10 @@ export type RemoteRowSelectionState = {
   excludedIds: string[];
 };
 
-export type RemoteRowSelectionConfig = {
+export type RemoteRowSelectionConfig<TData = unknown> = {
   strategy: "all-except";
+  resetOnQueryChange?: boolean | undefined;
+  getQueryScopeKey?: ((context: TableQueryContext<TData>) => string) | undefined;
 };
 
 export type RemoteRowSelectionController = {
@@ -57,6 +59,8 @@ export type ColumnOrderState = string[];
 export type ColumnPinningPosition = "left" | "right";
 
 export type ColumnPinningState = Record<string, ColumnPinningPosition>;
+
+export type ColumnSizingState = Record<string, number>;
 
 export type GroupingState<TData = unknown> = ColumnId<TData>[];
 
@@ -85,6 +89,7 @@ export type TableState = {
   columnVisibility: ColumnVisibilityState;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
+  columnSizing: ColumnSizingState;
   grouping: GroupingState;
   rowExpansion: RowExpansionState;
   loading: boolean;
@@ -99,6 +104,7 @@ export type PartialTableState = {
   columnVisibility?: ColumnVisibilityState;
   columnOrder?: ColumnOrderState;
   columnPinning?: ColumnPinningState;
+  columnSizing?: ColumnSizingState;
   grouping?: GroupingState | undefined;
   rowExpansion?: RowExpansionState | undefined;
   loading?: boolean;
@@ -113,6 +119,7 @@ export type TableControlledState<TData = unknown> = {
   columnVisibility: ColumnVisibilityState;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
+  columnSizing: ColumnSizingState;
   grouping: GroupingState<TData>;
   rowExpansion: RowExpansionState;
 };
@@ -125,6 +132,7 @@ export type TableControlledStateInput<TData = unknown> = {
   columnVisibility?: ColumnVisibilityState | undefined;
   columnOrder?: ColumnOrderState | undefined;
   columnPinning?: ColumnPinningState | undefined;
+  columnSizing?: ColumnSizingState | undefined;
   grouping?: GroupingState<TData> | undefined;
   rowExpansion?: RowExpansionState | undefined;
 };
@@ -137,6 +145,7 @@ export type TableFeatures = {
   columnVisibility?: boolean;
   columnOrdering?: boolean;
   columnPinning?: boolean;
+  columnResizing?: boolean;
   grouping?: boolean;
   rowExpansion?: boolean;
 };
@@ -166,6 +175,10 @@ export type ColumnOptions<TData, TKey extends RowKey<TData>> = {
   header?: string;
   sortable?: boolean;
   filterable?: boolean;
+  size?: number | undefined;
+  minSize?: number | undefined;
+  maxSize?: number | undefined;
+  resizable?: boolean | undefined;
   accessor?: AccessorFn<TData, TData[TKey]> | undefined;
   cell?: CellRenderer<TData, TData[TKey]> | undefined;
   sortFn?: SortFn<TData, TData[TKey]> | undefined;
@@ -177,6 +190,10 @@ export type ColumnTemplate<TKey extends string = string> = {
   header?: string;
   sortable?: boolean;
   filterable?: boolean;
+  size?: number | undefined;
+  minSize?: number | undefined;
+  maxSize?: number | undefined;
+  resizable?: boolean | undefined;
   accessor?: AccessorFn<unknown, unknown> | undefined;
   cell?: CellRenderer<unknown, unknown> | undefined;
   sortFn?: SortFn<unknown, unknown> | undefined;
@@ -188,6 +205,10 @@ export type ColumnDef<TData, TValue = unknown> = {
   header: string;
   sortable: boolean;
   filterable: boolean;
+  size?: number | undefined;
+  minSize?: number | undefined;
+  maxSize?: number | undefined;
+  resizable: boolean;
   accessor: AccessorFn<TData, TValue>;
   cell?: CellRenderer<TData, TValue> | undefined;
   sortFn?: SortFn<TData, TValue> | undefined;
@@ -200,6 +221,10 @@ export type TableCell<TData> = {
   id: string;
   columnId: string;
   pin: ColumnPinningPosition | null;
+  size: number;
+  minSize: number;
+  maxSize: number | null;
+  canResize: boolean;
   value: unknown;
   render: () => unknown;
 };
@@ -224,6 +249,10 @@ export type TableHeader = {
   id: string;
   label: string;
   pin: ColumnPinningPosition | null;
+  size: number;
+  minSize: number;
+  maxSize: number | null;
+  canResize: boolean;
   sortable: boolean;
   isSorted: boolean;
   sortDirection: SortDirection | null;
@@ -272,6 +301,17 @@ export type TableModel<TData> = {
   totalRows: number;
 };
 
+export type CsvExportOptions<TData> = {
+  includeHeaders?: boolean;
+  includeGroupRows?: boolean;
+  delimiter?: string;
+  newline?: string;
+  getHeaderValue?: ((header: TableHeader) => unknown) | undefined;
+  getCellValue?:
+    | ((cell: TableCell<TData>, row: TableRow<TData>) => unknown)
+    | undefined;
+};
+
 export type UseTableBaseConfig<TData> = {
   columns: readonly ColumnDef<TData>[];
   features?: TableFeatures | undefined;
@@ -289,7 +329,7 @@ export type LocalTableConfig<TData> = UseTableBaseConfig<TData> & {
 export type RemoteTableConfig<TData> = UseTableBaseConfig<TData> & {
   mode: "remote";
   query: TableQuery<TData>;
-  remoteRowSelection?: RemoteRowSelectionConfig | undefined;
+  remoteRowSelection?: RemoteRowSelectionConfig<TData> | undefined;
   remoteLoading?: RemoteLoadingConfig | undefined;
 };
 
@@ -311,6 +351,7 @@ export type TableInstance<TData> = {
   columnVisibility: ColumnVisibilityState;
   columnOrder: ColumnOrderState;
   columnPinning: ColumnPinningState;
+  columnSizing: ColumnSizingState;
   grouping: GroupingState<TData>;
   rowExpansion: RowExpansionState;
   loading: boolean;
@@ -344,12 +385,18 @@ export type TableInstance<TData> = {
     position: ColumnPinningPosition | null,
   ) => void;
   clearColumnPinning: () => void;
+  setColumnSize: (columnId: ColumnId<TData>, size: number) => void;
+  resizeColumn: (columnId: ColumnId<TData>, delta: number) => void;
+  clearColumnSizing: () => void;
   setRowExpanded: (rowId: string, expanded: boolean) => void;
   toggleRowExpanded: (rowId: string) => void;
   clearRowExpansion: () => void;
   toggleRowSelection: (rowId: string) => void;
   clearRowSelection: () => void;
 };
+
+
+
 
 
 

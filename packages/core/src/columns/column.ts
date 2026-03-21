@@ -10,6 +10,10 @@ type ColumnTemplateOptions = {
   header?: string;
   sortable?: boolean;
   filterable?: boolean;
+  size?: number | undefined;
+  minSize?: number | undefined;
+  maxSize?: number | undefined;
+  resizable?: boolean | undefined;
   accessor?: AccessorFn<unknown, unknown> | undefined;
   cell?: CellRenderer<unknown, unknown> | undefined;
   sortFn?: SortFn<unknown, unknown> | undefined;
@@ -32,6 +36,10 @@ export function column<TKey extends string>(
     header: options.header ?? toHeaderLabel(id),
     sortable: options.sortable ?? false,
     filterable: options.filterable ?? false,
+    ...(options.size !== undefined ? { size: options.size } : {}),
+    ...(options.minSize !== undefined ? { minSize: options.minSize } : {}),
+    ...(options.maxSize !== undefined ? { maxSize: options.maxSize } : {}),
+    resizable: options.resizable ?? true,
     ...(options.accessor ? { accessor: options.accessor } : {}),
     ...(options.cell ? { cell: options.cell } : {}),
     ...(options.sortFn ? { sortFn: options.sortFn } : {}),

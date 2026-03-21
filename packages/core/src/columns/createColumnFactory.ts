@@ -12,6 +12,10 @@ type BaseColumnOptions<TData, TValue> = {
   header?: string;
   sortable?: boolean;
   filterable?: boolean;
+  size?: number | undefined;
+  minSize?: number | undefined;
+  maxSize?: number | undefined;
+  resizable?: boolean | undefined;
   cell?: CellRenderer<TData, TValue> | undefined;
   sortFn?: SortFn<TData, TValue> | undefined;
   filterFn?: FilterFn<TData, TValue> | undefined;
@@ -50,6 +54,10 @@ function buildColumn<TData, TId extends ColumnId<TData>>(
     header: options.header ?? toHeaderLabel(id),
     sortable: options.sortable ?? false,
     filterable: options.filterable ?? false,
+    ...(options.size !== undefined ? { size: options.size } : {}),
+    ...(options.minSize !== undefined ? { minSize: options.minSize } : {}),
+    ...(options.maxSize !== undefined ? { maxSize: options.maxSize } : {}),
+    resizable: options.resizable ?? true,
     accessor: accessor as ColumnDef<TData>["accessor"],
     ...(options.cell ? { cell: options.cell as ColumnDef<TData>["cell"] } : {}),
     ...(options.sortFn ? { sortFn: options.sortFn as ColumnDef<TData>["sortFn"] } : {}),

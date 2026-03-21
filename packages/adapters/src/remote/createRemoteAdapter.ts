@@ -18,6 +18,7 @@ export async function createRemoteAdapter<TData>(
   const columnVisibilityEnabled = input.features?.columnVisibility ?? true;
   const columnOrderingEnabled = input.features?.columnOrdering ?? true;
   const columnPinningEnabled = input.features?.columnPinning ?? true;
+  const columnResizingEnabled = input.features?.columnResizing ?? true;
   const visibleColumns = columnVisibilityEnabled
     ? getVisibleColumns(input.columns, input.state.columnVisibility)
     : [...input.columns];
@@ -44,10 +45,12 @@ export async function createRemoteAdapter<TData>(
       orderedVisibleColumns,
       sortingEnabled ? input.state.sorting : null,
       columnPinningEnabled ? input.state.columnPinning : null,
+      columnResizingEnabled ? input.state.columnSizing : null,
     ),
     rows: createRows(result.rows, {
       columns: orderedVisibleColumns,
       columnPinning: columnPinningEnabled ? input.state.columnPinning : undefined,
+      columnSizing: columnResizingEnabled ? input.state.columnSizing : undefined,
       rowSelection: rowSelectionEnabled ? input.state.rowSelection : {},
       getRowId,
     }),

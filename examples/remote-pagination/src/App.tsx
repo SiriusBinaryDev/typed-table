@@ -99,7 +99,7 @@ function RemoteUsersTable() {
           <div className="remote-selection-copy">
             <span className="remote-stat-label">Remote selection</span>
             <p>
-              Select all matching rows across the remote result set, then use row checkboxes as explicit exclusions.
+              Select all matching rows across the remote result set, then use row checkboxes as explicit exclusions. Sorting changes reset the dataset scope in this demo, so the advanced selection clears automatically.
             </p>
           </div>
 
@@ -227,6 +227,7 @@ export function App() {
     },
     remoteRowSelection: {
       strategy: "all-except",
+      resetOnQueryChange: true,
     },
     query: async ({ pagination, sorting }) => {
       const result = await fetchUsers({
@@ -248,7 +249,7 @@ export function App() {
         <p className="remote-eyebrow">Live query preview</p>
         <h1>Remote pagination example</h1>
         <p className="remote-lede">
-          This demo simulates server-backed sorting and pagination with a short network delay, plus an optional remote selection strategy for dataset-level select-all behavior.
+          This demo simulates server-backed sorting and pagination with a short network delay, plus an optional remote selection strategy for dataset-level select-all behavior with automatic scope resets on sort changes.
         </p>
       </header>
 

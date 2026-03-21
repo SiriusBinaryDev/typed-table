@@ -1,8 +1,9 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import {
   clearColumnOrder as clearColumnOrderAction,
   clearColumnPinning as clearColumnPinningAction,
+  clearColumnSizing as clearColumnSizingAction,
   clearColumnVisibility as clearColumnVisibilityAction,
   clearFilter as clearFilterAction,
   clearFilters as clearFiltersAction,
@@ -14,15 +15,18 @@ import {
   createHeaders,
   createTableState,
   getColumnPinningPosition,
+  getColumnSizingInfo,
   getFacetedMinMaxValues as getFacetedMinMaxValuesHelper,
   getFacetedUniqueValues as getFacetedUniqueValuesHelper,
   getOrderedColumns,
   getVisibleColumns,
   moveColumn as moveColumnAction,
   normalizeGroupingState,
+  resizeColumn as resizeColumnAction,
   normalizeSortingState,
   setColumnOrder as setColumnOrderAction,
   setColumnPinning as setColumnPinningAction,
+  setColumnSize as setColumnSizeAction,
   setColumnVisibility as setColumnVisibilityAction,
   setFilter as setFilterAction,
   setGrouping as setGroupingAction,
@@ -127,6 +131,42 @@ function createFiltersDependencyKey(filters: FiltersState): string {
   );
 }
 
+type RemoteRowSelectionScopeContext<TData> = {
+  pagination: PaginationState;
+  sorting: SortingState<TData>;
+  filters: FiltersState;
+};
+
+function createRemoteRowSelectionScopeContext<TData>(
+  state: TableState,
+): RemoteRowSelectionScopeContext<TData> {
+  return {
+    pagination: { ...state.pagination },
+    sorting: state.sorting as SortingState<TData>,
+    filters: { ...state.filters },
+  };
+}
+
+function createDefaultRemoteRowSelectionScopeKey<TData>(
+  context: RemoteRowSelectionScopeContext<TData>,
+): string {
+  return JSON.stringify({
+    pageSize: context.pagination.pageSize,
+    sorting: context.sorting ?? [],
+    filters: Object.entries(context.filters).sort(([leftKey], [rightKey]) =>
+      leftKey.localeCompare(rightKey),
+    ),
+  });
+}
+
+function isRemoteRowSelectionCleared(rowSelection: RemoteRowSelectionState): boolean {
+  return (
+    rowSelection.mode === "include" &&
+    rowSelection.includedIds.length === 0 &&
+    rowSelection.excludedIds.length === 0
+  );
+}
+
 function shouldAppendRemoteSnapshot<TData>(
   previous: RemoteSnapshot<TData> | null,
   next: RemoteSnapshot<TData>,
@@ -190,6 +230,7 @@ function createControlledStateSnapshot<TData>(
     columnVisibility: { ...state.columnVisibility },
     columnOrder: [...state.columnOrder],
     columnPinning: { ...state.columnPinning },
+    columnSizing: { ...state.columnSizing },
     grouping: [...state.grouping] as GroupingState<TData>,
     rowExpansion: { ...state.rowExpansion },
   };
@@ -232,6 +273,10 @@ function resolveTableState<TData>(
       controlledState.columnPinning !== undefined
         ? controlledState.columnPinning
         : internalState.columnPinning,
+    columnSizing:
+      controlledState.columnSizing !== undefined
+        ? controlledState.columnSizing
+        : internalState.columnSizing,
     grouping:
       controlledState.grouping !== undefined
         ? normalizeGroupingState(controlledState.grouping)
@@ -322,15 +367,20 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
   const columnVisibilityEnabled = config.features?.columnVisibility ?? true;
   const columnOrderingEnabled = config.features?.columnOrdering ?? true;
   const columnPinningEnabled = config.features?.columnPinning ?? true;
+  const columnResizingEnabled = config.features?.columnResizing ?? true;
   const groupingEnabled = config.features?.grouping ?? true;
   const rowExpansionEnabled = config.features?.rowExpansion ?? true;
   const isRemote = config.mode === "remote";
+  const remoteRowSelectionConfig = isRemote ? config.remoteRowSelection : undefined;
   const remoteLoadingMode: RemoteLoadingMode =
     isRemote ? config.remoteLoading?.mode ?? "replace" : "replace";
   const advancedRemoteRowSelectionEnabled =
     isRemote &&
     rowSelectionEnabled &&
-    config.remoteRowSelection?.strategy === "all-except";
+    remoteRowSelectionConfig?.strategy === "all-except";
+  const remoteRowSelectionResetOnQueryChange =
+    advancedRemoteRowSelectionEnabled &&
+    (remoteRowSelectionConfig?.resetOnQueryChange ?? false);
   const localData = isRemote ? undefined : config.data;
   const remoteQuery: TableQuery<TData> | null = isRemote ? config.query : null;
   const validColumnIds = new Set(config.columns.map((column) => column.id));
@@ -346,6 +396,12 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
   const state = resolveTableState(internalState, config.state);
   const sortingDependencyKey = createSortingDependencyKey(state.sorting);
   const filtersDependencyKey = createFiltersDependencyKey(state.filters);
+  const remoteRowSelectionScopeContext = createRemoteRowSelectionScopeContext<TData>(state);
+  const remoteRowSelectionScopeKey = advancedRemoteRowSelectionEnabled
+    ? remoteRowSelectionConfig?.getQueryScopeKey?.(remoteRowSelectionScopeContext) ??
+      createDefaultRemoteRowSelectionScopeKey(remoteRowSelectionScopeContext)
+    : null;
+  const previousRemoteRowSelectionScopeKeyRef = useRef<string | null>(null);
 
   function updateState(recipe: (current: TableState) => TableState): void {
     setInternalState((currentInternalState) => {
@@ -375,6 +431,7 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
           columnVisibility: false,
           columnOrdering: false,
           columnPinning: false,
+          columnResizing: false,
           grouping: false,
           rowExpansion: false,
         },
@@ -384,6 +441,29 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
       });
     },
   );
+
+  useEffect(() => {
+    if (advancedRemoteRowSelectionEnabled && remoteRowSelectionScopeKey != null) {
+      if (!remoteRowSelectionResetOnQueryChange) {
+        previousRemoteRowSelectionScopeKeyRef.current = remoteRowSelectionScopeKey;
+      } else if (previousRemoteRowSelectionScopeKeyRef.current == null) {
+        previousRemoteRowSelectionScopeKeyRef.current = remoteRowSelectionScopeKey;
+      } else if (previousRemoteRowSelectionScopeKeyRef.current !== remoteRowSelectionScopeKey) {
+        previousRemoteRowSelectionScopeKeyRef.current = remoteRowSelectionScopeKey;
+
+        if (!isRemoteRowSelectionCleared(remoteAdvancedRowSelection)) {
+          setRemoteAdvancedRowSelection(clearRemoteRowSelection());
+        }
+      }
+    } else {
+      previousRemoteRowSelectionScopeKeyRef.current = null;
+    }
+  }, [
+    advancedRemoteRowSelectionEnabled,
+    remoteAdvancedRowSelection,
+    remoteRowSelectionResetOnQueryChange,
+    remoteRowSelectionScopeKey,
+  ]);
 
   useEffect(() => {
     if (!isRemote) {
@@ -486,6 +566,7 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
           columnVisibility: columnVisibilityEnabled,
           columnOrdering: columnOrderingEnabled,
           columnPinning: columnPinningEnabled,
+          columnResizing: columnResizingEnabled,
           grouping: groupingEnabled,
           rowExpansion: rowExpansionEnabled,
         },
@@ -494,7 +575,12 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
     : null;
 
   const remoteModel: TableModel<TData> = remoteSnapshot?.model ?? {
-    headers: createHeaders(config.columns, null),
+    headers: createHeaders(
+      config.columns,
+      null,
+      null,
+      columnResizingEnabled ? state.columnSizing : null,
+    ),
     rows: [],
     pageCount: 0,
     totalRows: 0,
@@ -510,6 +596,10 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
         : row.isSelected,
       cells: orderedVisibleColumns.flatMap((column) => {
         const cell = cellsByColumnId.get(column.id);
+        const { size, minSize, maxSize, canResize } = getColumnSizingInfo(
+          column,
+          columnResizingEnabled ? state.columnSizing : null,
+        );
 
         if (!cell) {
           return [];
@@ -521,6 +611,10 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
             pin: columnPinningEnabled
               ? getColumnPinningPosition(column.id, state.columnPinning)
               : null,
+            size,
+            minSize,
+            maxSize,
+            canResize,
           },
         ];
       }),
@@ -533,6 +627,7 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
           orderedVisibleColumns,
           sortingEnabled ? state.sorting : null,
           columnPinningEnabled ? state.columnPinning : null,
+          columnResizingEnabled ? state.columnSizing : null,
         ),
         rows: remoteRows,
         pageCount: paginationEnabled
@@ -810,6 +905,38 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
     updateState((current) => clearColumnPinningAction(current));
   }
 
+  function setColumnSizeValue(columnId: ColumnId<TData>, size: number): void {
+    if (!columnResizingEnabled) {
+      return;
+    }
+
+    if (!validColumnIds.has(columnId)) {
+      return;
+    }
+
+    updateState((current) => setColumnSizeAction(current, columnId, size, config.columns));
+  }
+
+  function resizeColumnValue(columnId: ColumnId<TData>, delta: number): void {
+    if (!columnResizingEnabled) {
+      return;
+    }
+
+    if (!validColumnIds.has(columnId)) {
+      return;
+    }
+
+    updateState((current) => resizeColumnAction(current, columnId, delta, config.columns));
+  }
+
+  function clearColumnSizing(): void {
+    if (!columnResizingEnabled) {
+      return;
+    }
+
+    updateState((current) => clearColumnSizingAction(current));
+  }
+
   function setRowExpandedValue(rowId: string, expanded: boolean): void {
     if (!groupingEnabled || !rowExpansionEnabled) {
       return;
@@ -917,6 +1044,7 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
     columnVisibility: columnVisibilityEnabled ? state.columnVisibility : {},
     columnOrder: columnOrderingEnabled ? state.columnOrder : [],
     columnPinning: columnPinningEnabled ? state.columnPinning : {},
+    columnSizing: columnResizingEnabled ? state.columnSizing : {},
     grouping: groupingEnabled ? state.grouping : [],
     rowExpansion: groupingEnabled && rowExpansionEnabled ? state.rowExpansion : {},
     loading: state.loading,
@@ -947,6 +1075,9 @@ export function useTable<TData>(config: UseTableConfig<TData>): TableInstance<TD
     clearColumnOrder,
     setColumnPinning: setColumnPinningValue,
     clearColumnPinning,
+    setColumnSize: setColumnSizeValue,
+    resizeColumn: resizeColumnValue,
+    clearColumnSizing,
     setRowExpanded: setRowExpandedValue,
     toggleRowExpanded: toggleRowExpandedValue,
     clearRowExpansion,

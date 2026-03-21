@@ -26,10 +26,32 @@ const users: User[] = [
 ];
 
 const columns = createColumns<User>([
-  column("name", { header: "Name", sortable: true, filterable: true }),
-  column("email", { header: "Email", filterable: true }),
-  column("team", { header: "Team", sortable: true }),
-  column("age", { header: "Age", sortable: true }),
+  column("name", {
+    header: "Name",
+    sortable: true,
+    filterable: true,
+    size: 220,
+    minSize: 180,
+  }),
+  column("email", {
+    header: "Email",
+    filterable: true,
+    size: 280,
+    minSize: 220,
+  }),
+  column("team", {
+    header: "Team",
+    sortable: true,
+    size: 160,
+    minSize: 120,
+  }),
+  column("age", {
+    header: "Age",
+    sortable: true,
+    size: 96,
+    minSize: 72,
+    maxSize: 132,
+  }),
 ]);
 
 const columnOptions = columns.map((column) => ({
@@ -128,6 +150,53 @@ function UsersTable() {
 
         <div className="basic-column-controls">
           <div className="basic-inline-header">
+            <span className="basic-field-label">Column widths</span>
+            <button
+              className="basic-text-button"
+              onClick={table.clearColumnSizing}
+              type="button"
+            >
+              Reset widths
+            </button>
+          </div>
+
+          <div className="basic-chip-row basic-size-grid">
+            {table.headers.map((header) => (
+              <div key={header.id} className="basic-size-card">
+                <div className="basic-size-card-header">
+                  <strong>{header.label}</strong>
+                  <span className="basic-chip-meta">{header.size}px</span>
+                </div>
+                <div className="basic-size-actions">
+                  <button
+                    className="basic-size-button"
+                    disabled={!header.canResize}
+                    onClick={() => table.resizeColumn(header.id, -24)}
+                    type="button"
+                  >
+                    -24
+                  </button>
+                  <button
+                    className="basic-size-button"
+                    disabled={!header.canResize}
+                    onClick={() => table.resizeColumn(header.id, 24)}
+                    type="button"
+                  >
+                    +24
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p className="basic-helper">
+            Widths are headless numeric state on headers and cells. This demo steps each visible
+            column by 24px.
+          </p>
+        </div>
+
+        <div className="basic-column-controls">
+          <div className="basic-inline-header">
             <span className="basic-field-label">Grouping</span>
             <div className="basic-inline-actions">
               <button
@@ -175,6 +244,12 @@ function UsersTable() {
 
       <section className="basic-panel basic-table-shell">
         <table className="basic-table">
+          <colgroup>
+            <col style={{ width: "72px" }} />
+            {table.headers.map((header) => (
+              <col key={header.id} style={{ width: `${header.size}px` }} />
+            ))}
+          </colgroup>
           <thead>
             <tr>
               <th>Select</th>
@@ -193,6 +268,7 @@ function UsersTable() {
                         Group {table.grouping.indexOf(header.id) + 1}
                       </span>
                     ) : null}
+                    <span className="basic-width-badge">{header.size}px</span>
                     {header.isSorted ? (
                       <span className="basic-sort-state">
                         {header.sortDirection} {header.sortIndex}
@@ -305,6 +381,7 @@ export function App() {
       rowExpansion: true,
       rowSelection: true,
       columnVisibility: true,
+      columnResizing: true,
     },
   });
 
@@ -315,8 +392,8 @@ export function App() {
         <h1>Basic example</h1>
         <p className="basic-lede">
           A compact people table with filtering, sorting, grouping, expandable grouped rows,
-          pagination, row selection, and column visibility. Shift-click headers to add
-          secondary sorts.
+          pagination, row selection, column visibility, and host-rendered column sizing. Shift-click
+          headers to add secondary sorts.
         </p>
       </section>
 

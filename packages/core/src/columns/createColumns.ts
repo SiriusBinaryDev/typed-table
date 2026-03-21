@@ -35,6 +35,10 @@ function normalizeColumn<TData>(
     header: template.header ?? toHeaderLabel(template.id),
     sortable: template.sortable ?? false,
     filterable: template.filterable ?? false,
+    ...(template.size !== undefined ? { size: template.size } : {}),
+    ...(template.minSize !== undefined ? { minSize: template.minSize } : {}),
+    ...(template.maxSize !== undefined ? { maxSize: template.maxSize } : {}),
+    resizable: template.resizable ?? true,
     accessor: accessor as (row: TData) => unknown,
     ...(template.cell ? { cell: template.cell as ColumnDef<TData>["cell"] } : {}),
     ...(template.sortFn

@@ -1,7 +1,9 @@
 import type {
+  ColumnDef,
   ColumnId,
   ColumnOrderState,
   ColumnPinningPosition,
+  ColumnSizingState,
   FiltersState,
   GroupingState,
   PaginationState,
@@ -12,6 +14,7 @@ import type {
   TableState,
 } from "../types/index.js";
 
+import { getColumnSizingInfo } from "../columns/getColumnSizing.js";
 import { getOrderedColumnIds } from "../columns/getOrderedColumns.js";
 import { isRowExpanded, normalizeGroupingState } from "../state/groupingState.js";
 import { normalizeSortingState, toSortingState } from "../state/sortingState.js";
@@ -302,6 +305,73 @@ export function clearColumnPinning(state: TableState): TableState {
   return {
     ...state,
     columnPinning: {},
+  };
+}
+
+function getColumnDefinition<TData>(
+  columns: readonly ColumnDef<TData>[],
+  columnId: ColumnId<TData>,
+): ColumnDef<TData> | null {
+  return columns.find((column) => column.id === columnId) ?? null;
+}
+
+export function setColumnSize<TData>(
+  state: TableState,
+  columnId: ColumnId<TData>,
+  size: number,
+  columns: readonly ColumnDef<TData>[],
+): TableState {
+  const column = getColumnDefinition(columns, columnId);
+
+  if (!column) {
+    return state;
+  }
+
+  const { baseSize, minSize, maxSize } = getColumnSizingInfo(column);
+  const nextColumnSizing: ColumnSizingState = { ...state.columnSizing };
+
+  if (!Number.isFinite(size)) {
+    delete nextColumnSizing[columnId];
+  } else {
+    const normalizedSize = Math.max(
+      minSize,
+      maxSize == null ? Math.floor(size) : Math.min(Math.floor(size), maxSize),
+    );
+
+    if (normalizedSize === baseSize) {
+      delete nextColumnSizing[columnId];
+    } else {
+      nextColumnSizing[columnId] = normalizedSize;
+    }
+  }
+
+  return {
+    ...state,
+    columnSizing: nextColumnSizing,
+  };
+}
+
+export function resizeColumn<TData>(
+  state: TableState,
+  columnId: ColumnId<TData>,
+  delta: number,
+  columns: readonly ColumnDef<TData>[],
+): TableState {
+  const column = getColumnDefinition(columns, columnId);
+
+  if (!column) {
+    return state;
+  }
+
+  const { size } = getColumnSizingInfo(column, state.columnSizing);
+
+  return setColumnSize(state, columnId, size + delta, columns);
+}
+
+export function clearColumnSizing(state: TableState): TableState {
+  return {
+    ...state,
+    columnSizing: {},
   };
 }
 

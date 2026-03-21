@@ -2,6 +2,7 @@ import type {
   ColumnDef,
   ColumnId,
   ColumnPinningState,
+  ColumnSizingState,
   GetRowId,
   RowExpansionState,
   RowSelectionState,
@@ -9,6 +10,7 @@ import type {
   TableRow,
 } from "../types/index.js";
 
+import { getColumnSizingInfo } from "../columns/getColumnSizing.js";
 import { getColumnPinningPosition } from "../columns/getOrderedColumns.js";
 import { isRowExpanded } from "../state/groupingState.js";
 
@@ -17,6 +19,7 @@ type CreateGroupedRowsOptions<TData> = {
   visibleColumns: readonly ColumnDef<TData>[];
   grouping: readonly ColumnId<TData>[];
   columnPinning?: ColumnPinningState | undefined;
+  columnSizing?: ColumnSizingState | undefined;
   rowSelection?: RowSelectionState | undefined;
   rowExpansion?: RowExpansionState | undefined;
   getRowId?: GetRowId<TData> | undefined;
@@ -69,14 +72,23 @@ function createDataRowCells<TData>(
   rowId: string,
   columns: readonly ColumnDef<TData>[],
   columnPinning: ColumnPinningState | undefined,
+  columnSizing: ColumnSizingState | undefined,
 ): TableCell<TData>[] {
   return columns.map<TableCell<TData>>((column) => {
     const value = column.accessor(original);
+    const { size, minSize, maxSize, canResize } = getColumnSizingInfo(
+      column,
+      columnSizing,
+    );
 
     return {
       id: `${rowId}:${column.id}`,
       columnId: column.id,
       pin: getColumnPinningPosition(column.id, columnPinning),
+      size,
+      minSize,
+      maxSize,
+      canResize,
       value,
       render: () =>
         column.cell
@@ -92,14 +104,23 @@ function createGroupRowCells<TData>(
   groupingColumnId: string,
   groupingValue: unknown,
   columnPinning: ColumnPinningState | undefined,
+  columnSizing: ColumnSizingState | undefined,
 ): TableCell<TData>[] {
   return columns.map<TableCell<TData>>((column) => {
     const value = column.id === groupingColumnId ? groupingValue : null;
+    const { size, minSize, maxSize, canResize } = getColumnSizingInfo(
+      column,
+      columnSizing,
+    );
 
     return {
       id: `${rowId}:${column.id}`,
       columnId: column.id,
       pin: getColumnPinningPosition(column.id, columnPinning),
+      size,
+      minSize,
+      maxSize,
+      canResize,
       value,
       render: () => value,
     };
@@ -164,6 +185,7 @@ export function createGroupedRows<TData>(
           entry.id,
           options.visibleColumns,
           options.columnPinning,
+          options.columnSizing,
         ),
       }));
     }
@@ -211,6 +233,7 @@ export function createGroupedRows<TData>(
           groupingColumn.id,
           bucket.value,
           options.columnPinning,
+          options.columnSizing,
         ),
       };
     });

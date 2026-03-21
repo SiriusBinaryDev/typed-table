@@ -23,6 +23,7 @@ export function createLocalAdapter<TData>(
   const columnVisibilityEnabled = input.features?.columnVisibility ?? true;
   const columnOrderingEnabled = input.features?.columnOrdering ?? true;
   const columnPinningEnabled = input.features?.columnPinning ?? true;
+  const columnResizingEnabled = input.features?.columnResizing ?? true;
   const groupingEnabled = input.features?.grouping ?? true;
   const rowExpansionEnabled = input.features?.rowExpansion ?? true;
   const visibleColumns = columnVisibilityEnabled
@@ -52,6 +53,7 @@ export function createLocalAdapter<TData>(
         visibleColumns: orderedVisibleColumns,
         grouping,
         columnPinning: columnPinningEnabled ? input.state.columnPinning : undefined,
+        columnSizing: columnResizingEnabled ? input.state.columnSizing : undefined,
         rowSelection: rowSelectionEnabled ? input.state.rowSelection : {},
         rowExpansion: rowExpansionEnabled ? input.state.rowExpansion : {},
         ...(input.getRowId ? { getRowId: input.getRowId } : {}),
@@ -75,6 +77,7 @@ export function createLocalAdapter<TData>(
         {
           columns: orderedVisibleColumns,
           columnPinning: columnPinningEnabled ? input.state.columnPinning : undefined,
+          columnSizing: columnResizingEnabled ? input.state.columnSizing : undefined,
           rowSelection: rowSelectionEnabled ? input.state.rowSelection : {},
           ...(input.getRowId ? { getRowId: input.getRowId } : {}),
         },
@@ -85,6 +88,7 @@ export function createLocalAdapter<TData>(
       orderedVisibleColumns,
       sortingEnabled ? input.state.sorting : null,
       columnPinningEnabled ? input.state.columnPinning : null,
+      columnResizingEnabled ? input.state.columnSizing : null,
     ),
     rows,
     pageCount,
