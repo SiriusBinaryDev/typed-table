@@ -1,0 +1,47 @@
+{
+  "name": "@typed-table/react",
+  "version": "0.2.3",
+  "description": "React integration package for typed-table.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "table",
+    "typescript",
+    "headless",
+    "react"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SiriusBinaryDev/typed-table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SiriusBinaryDev/typed-table/issues"
+  },
+  "homepage": "https://github.com/SiriusBinaryDev/typed-table#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "@typed-table/adapters": "0.2.3",
+    "@typed-table/core": "0.2.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  }
+}

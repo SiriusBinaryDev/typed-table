@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": true
+  },
+  "references": [
+    { "path": "../../packages/react" }
+  ],
+  "include": ["src/**/*", "vite.config.ts"]
+}
+

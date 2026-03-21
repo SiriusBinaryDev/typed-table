@@ -1,0 +1,288 @@
+:root {
+  color: #163046;
+  background:
+    radial-gradient(circle at top left, rgba(104, 164, 255, 0.22), transparent 34%),
+    linear-gradient(180deg, #edf4ff 0%, #f8fbff 60%, #e6eefc 100%);
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.remote-example {
+  width: min(1080px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: 36px 0 56px;
+}
+
+.remote-hero {
+  margin-bottom: 24px;
+}
+
+.remote-eyebrow {
+  margin: 0 0 10px;
+  color: #2664c8;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.74rem;
+}
+
+.remote-example h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  line-height: 0.96;
+}
+
+.remote-lede {
+  margin: 12px 0 0;
+  max-width: 44rem;
+  color: #50667f;
+  line-height: 1.65;
+}
+
+.remote-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.remote-panel {
+  border: 1px solid rgba(32, 85, 170, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 26px 62px rgba(62, 100, 170, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.remote-stats {
+  padding: 18px 22px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.remote-stats strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.35rem;
+}
+
+.remote-stat-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #58708b;
+}
+
+.remote-selection,
+.remote-controls,
+.remote-facets {
+  padding: 20px 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.remote-selection-copy p,
+.remote-copy {
+  margin: 8px 0 0;
+  color: #556a84;
+  line-height: 1.55;
+}
+
+.remote-selection-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.remote-selection-metrics {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.remote-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #e8f1ff;
+  color: #1d5cb7;
+  font-size: 0.84rem;
+}
+
+.remote-pill.is-active {
+  background: #194286;
+  color: #f4f8ff;
+}
+
+.remote-table-shell {
+  overflow: hidden;
+}
+
+.remote-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.remote-table th,
+.remote-table td {
+  padding: 16px 18px;
+  text-align: left;
+  border-bottom: 1px solid rgba(39, 80, 139, 0.1);
+  vertical-align: top;
+}
+
+.remote-table thead th {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #5b7290;
+}
+
+.remote-heading-cell {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.remote-sortable {
+  cursor: pointer;
+}
+
+.remote-sort-state {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dceaff;
+  color: #1d5cb7;
+  font-size: 0.7rem;
+}
+
+.remote-table tbody tr.is-selected {
+  background: rgba(83, 134, 214, 0.12);
+}
+
+.remote-table tbody tr:hover {
+  background: rgba(238, 245, 255, 0.96);
+}
+
+.remote-cell-content {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 22px;
+}
+
+.remote-cell-content.is-group {
+  color: #29496c;
+}
+
+.remote-group-count {
+  font-size: 0.8rem;
+  color: #5f7390;
+}
+
+.remote-empty {
+  color: #9bb0c7;
+}
+
+.remote-group-toggle {
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #dceaff;
+  color: #1d5cb7;
+}
+
+.remote-footer {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+}
+
+.remote-pagination,
+.remote-feedback {
+  border: 1px solid rgba(32, 85, 170, 0.12);
+  border-radius: 22px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.remote-pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.remote-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #194286;
+  color: #f4f8ff;
+}
+
+.remote-button.remote-button-ghost {
+  background: #dceaff;
+  color: #1d5cb7;
+}
+
+.remote-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.remote-page-indicator {
+  color: #516885;
+}
+
+.remote-status {
+  margin: 0;
+  color: #516885;
+}
+
+.remote-status.is-loading {
+  color: #1f5cc4;
+  font-weight: 600;
+}
+
+.remote-status.is-error {
+  color: #c5423c;
+  font-weight: 600;
+}
+
+@media (max-width: 820px) {
+  .remote-stats,
+  .remote-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .remote-table-shell {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .remote-example {
+    width: min(100vw - 20px, 1080px);
+  }
+}
