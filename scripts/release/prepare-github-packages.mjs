@@ -41,6 +41,16 @@ function rewriteDependencyMap(dependencies) {
   );
 }
 
+function getMirrorScripts(scripts) {
+  if (!scripts) {
+    return undefined;
+  }
+
+  const { prepublishOnly: _prepublishOnly, prepare: _prepare, prepack: _prepack, postpack: _postpack, build: _build, ...remainingScripts } = scripts;
+
+  return Object.keys(remainingScripts).length > 0 ? remainingScripts : undefined;
+}
+
 rmSync(outputDir, { recursive: true, force: true });
 mkdirSync(outputDir, { recursive: true });
 
@@ -71,8 +81,10 @@ for (const config of packageConfigs) {
     ...packageJson,
     name: config.mirrorName,
     publishConfig: {
+      ...packageJson.publishConfig,
       registry: "https://npm.pkg.github.com",
     },
+    scripts: getMirrorScripts(packageJson.scripts),
     dependencies: rewriteDependencyMap(packageJson.dependencies),
     optionalDependencies: rewriteDependencyMap(packageJson.optionalDependencies),
     peerDependencies: rewriteDependencyMap(packageJson.peerDependencies),
@@ -96,4 +108,3 @@ writeFileSync(
     2,
   )}\n`,
 );
-
