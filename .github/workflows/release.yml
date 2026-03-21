@@ -34,9 +34,9 @@ jobs:
         run: node scripts/release/prepare-github-packages.mjs
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe
-        with:
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" --generate-notes --verify-tag
 
       - name: Configure GitHub Packages registry
         uses: actions/setup-node@v4
@@ -59,4 +59,3 @@ jobs:
         run: npm publish .github-packages/typed-table-react
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
