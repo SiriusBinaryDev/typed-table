@@ -191,6 +191,8 @@ Notes:
 - `columnVisibility` is sparse state where omitted columns remain visible; use `setColumnVisibility`, `toggleColumnVisibility`, or `clearColumnVisibility` to control rendered headers and cells.
 - `columnOrder` stores the current render order for columns; use `setColumnOrder`, `moveColumn`, or `clearColumnOrder` to manage it.
 - `columnPinning` is sparse state where omitted columns stay in the center region; use `setColumnPinning(columnId, "left" | "right" | null)` or `clearColumnPinning()` to manage pinned regions.
+- `columnSizing` is sparse override state where omitted columns fall back to their definition sizes; use `setColumnSize(columnId, size)`, `resizeColumn(columnId, delta)`, or `clearColumnSizing()` to manage host-rendered widths.
+- `TableHeader.size`, `TableHeader.minSize`, `TableHeader.maxSize`, and the matching `TableCell` fields expose the resolved sizing metadata for the current visible layout.
 - `grouping` is an ordered local-only column id list; use `setGrouping`, `toggleGrouping`, or `clearGrouping` to control grouped row levels.
 - `rowExpansion` is sparse local state where omitted grouped row ids remain expanded; use `setRowExpanded`, `toggleRowExpanded`, or `clearRowExpansion()` to manage visible rows inside grouped trees.
 - Group rows in `table.rows` use `row.type === "group"` and expose `depth`, `groupingColumnId`, `groupingValue`, `leafRowCount`, `canExpand`, and `isExpanded` for host-rendered nesting and expand/collapse controls.
@@ -199,6 +201,7 @@ Notes:
 - `TableHeader.pin` and `TableCell.pin` expose `"left"`, `"right"`, or `null` so host UIs can render pinned regions without a component library.
 - `clearSortingColumn(columnId)` removes one descriptor from the current sort stack without resetting the others.
 - `remoteLoading: { mode: "append" }` keeps prior remote pages in `table.rows` when users load the next page in the same query scope. Changing sorting, filters, or page size resets the accumulated rows.
+- Advanced remote row selection can opt into automatic resets on query-scope changes with `resetOnQueryChange: true`; the default scope is sorting + filters + page size, and `getQueryScopeKey(...)` lets hosts narrow or widen that boundary explicitly.
 - If you want hiding a column to also clear hidden-column filter or sorting state, do that in your UI event handler.
 
 Column layout example:
@@ -212,10 +215,12 @@ const table = useTable<User>({
 table.moveColumn("displayName", 0);
 table.setColumnPinning("name", "left");
 table.setColumnPinning("actions", "right");
+table.resizeColumn("displayName", 32);
 
 table.headers.map((header) => ({
   id: header.id,
   pin: header.pin,
+  size: header.size,
 }));
 ```
 
@@ -252,16 +257,42 @@ const table = useTable<User>({
 table.remoteRowSelection?.selectAllMatchingRows();
 table.toggleRowSelection("row-42");
 
-// Reset selection if the remote query scope changes in your app.
+// Opt in to automatic resets when sorting, filters, or page size change.
+const autoResetTable = useTable<User>({
+  columns,
+  mode: "remote",
+  query: fetchUsers,
+  getRowId: (row) => row.id,
+  remoteRowSelection: {
+    strategy: "all-except",
+    resetOnQueryChange: true,
+  },
+});
+
+// Or provide your own query-scope key when the default boundary is too broad.
+const customScopeTable = useTable<User>({
+  columns,
+  mode: "remote",
+  query: fetchUsers,
+  getRowId: (row) => row.id,
+  remoteRowSelection: {
+    strategy: "all-except",
+    resetOnQueryChange: true,
+    getQueryScopeKey: ({ filters }) => JSON.stringify({ tenant: filters.tenantId ?? null }),
+  },
+});
+
+// You can still clear it manually whenever your app needs to.
 table.clearRowSelection();
 ```
 
 Example apps:
 
-- `examples/basic-table` covers local sorting, filtering, grouping, expandable grouped rows, pagination, row selection, column visibility, shift-click multi-sort, and local faceted filter metadata.
+- `examples/basic-table` covers local sorting, filtering, grouping, expandable grouped rows, pagination, row selection, column visibility, headless column sizing controls, shift-click multi-sort, and local faceted filter metadata.
 - `examples/filter-row-selection` focuses on multi-control filtering, selection summaries, and context-driven table composition.
 - `examples/remote-pagination` shows remote querying with pagination, sorting, ordered sort descriptors, and optional dataset-level remote row selection.
-- `examples/infinite-scroll` shows append-oriented remote loading with sequential page accumulation and a scroll-triggered load-more sentinel.
+- `examples/infinite-scroll` shows append-oriented remote loading with sequential page accumulation and a scroll-triggered load-more sentinel. It is a loading-pattern example, not a DOM-windowing example.
+- For broader row/column virtualization guidance, see `docs/virtualization.md`.
 
 ## `@typed-table/core`
 
@@ -351,8 +382,10 @@ Notes:
 - Column visibility only affects rendered headers and cells; sorting and filtering can still reference hidden columns if you leave that state intact.
 - `getOrderedColumns(...)` combines explicit column order with left/right pinning so adapters and host code can derive a stable render layout from headless state.
 - `createGroupedRows(...)` builds a grouped local row tree and returns the flattened visible rows used for pagination.
+- `createHeaders(...)`, `createRows(...)`, and `createGroupedRows(...)` resolve `size`, `minSize`, `maxSize`, and `canResize` metadata from the column definitions plus sparse `columnSizing` state.
 - Group rows use `TableRow.type === "group"`; their metadata is designed for host-rendered nesting and expand/collapse controls.
 - `clearSortingColumn(state, columnId)` is useful when UI code wants to reconcile hidden-column state manually.
+- `setColumnSize(state, columnId, size, columns)` and `resizeColumn(state, columnId, delta, columns)` clamp to each column's min/max bounds and keep `columnSizing` sparse by dropping overrides that return to the definition size.
 - The advanced remote include/exclude selection controller is exposed through `useTable`; `core` keeps the basic row-selection map and related table types.
 - `RemoteLoadingConfig` describes whether remote pages replace the current rows or append sequentially in React remote mode.
 - Use `core` directly when you do not want React state ownership.

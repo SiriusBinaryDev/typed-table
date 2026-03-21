@@ -14,7 +14,7 @@ Headless, strongly typed table state engine for React and TypeScript.
   - column definitions
   - table state
   - row and header models
-  - filtering, faceted filter-value metadata, multi-column sorting, pagination, grouping, row expansion, column visibility, column ordering, and column pinning state
+  - filtering, faceted filter-value metadata, multi-column sorting, pagination, grouping, row expansion, column visibility, column ordering, column pinning, and column sizing state
   - pure state transition helpers and grouped-row metadata for local tables
 - React package for:
   - `useTable`
@@ -25,7 +25,7 @@ Headless, strongly typed table state engine for React and TypeScript.
   - local data mode
   - remote query mode with replace-or-append loading handled by the React hook
 - Example apps for:
-  - local basic table rendering with grouping, expandable grouped rows, and column visibility controls
+  - local basic table rendering with grouping, expandable grouped rows, column visibility controls, and host-rendered sizing controls
   - focused filtering and row selection workflows
   - remote pagination, sorting, and optional dataset-level row selection
   - append-oriented remote loading through a dedicated infinite-scroll demo
@@ -79,20 +79,22 @@ Dependency direction:
   - package-level API guide with examples for `core`, `react`, and `adapters`
 - `docs/release.md`
   - release checklist and Changesets workflow
+- `docs/virtualization.md`
+  - guidance for row/column virtualization patterns without adding runtime helpers
 - `CONTRIBUTING.md`
   - setup, workflow expectations, and pull request checklist
 
 ## Package APIs
 
-Use `@typed-table/react` when building a React table UI. Its main exports are `useTable`, `TableProvider`, `useTableContext`, `column`, `createColumns`, and `createColumnFactory` for strongly typed custom column callbacks, including accessor columns with arbitrary string ids. The hook exposes partial controlled-state ownership through `state` and `onStateChange`, local faceting through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, headless grouping and expansion state through `grouping`, `rowExpansion`, `toggleGrouping`, and `toggleRowExpanded`, grouped-row metadata on `table.rows`, headless column layout state through `columnOrder`, `columnPinning`, `setColumnOrder`, `moveColumn`, and `setColumnPinning`, and opt-in append-oriented remote loading through `remoteLoading: { mode: "append" }`. Grouping, grouped-row expansion, and faceted metadata are currently local-table features.
+Use `@typed-table/react` when building a React table UI. Its main exports are `useTable`, `TableProvider`, `useTableContext`, `column`, `createColumns`, `createColumnFactory`, and `exportTableToCsv` for strongly typed custom column callbacks, accessor columns with arbitrary string ids, and headless CSV export of the current visible table model. The hook exposes partial controlled-state ownership through `state` and `onStateChange`, local faceting through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, headless grouping and expansion state through `grouping`, `rowExpansion`, `toggleGrouping`, and `toggleRowExpanded`, grouped-row metadata on `table.rows`, headless column layout state through `columnOrder`, `columnPinning`, `columnSizing`, `setColumnOrder`, `moveColumn`, `setColumnPinning`, `setColumnSize`, `resizeColumn`, and `clearColumnSizing`, plus header/cell sizing metadata for host-rendered layouts, and opt-in append-oriented remote loading through `remoteLoading: { mode: "append" }`. Grouping, grouped-row expansion, and faceted metadata are currently local-table features.
 
-Use `@typed-table/core` when you need the framework-agnostic engine. Its main exports are the column helpers, `createColumnFactory`, the table state factory, controlled-state and faceting types, pipeline functions such as `getFacetedUniqueValues(...)` and `getFacetedMinMaxValues(...)`, grouped and flat row-model builders, and pure state actions for sorting, grouping, expansion, visibility, and layout.
+Use `@typed-table/core` when you need the framework-agnostic engine. Its main exports are the column helpers, `createColumnFactory`, the table state factory, controlled-state and faceting types, pipeline functions such as `getFacetedUniqueValues(...)` and `getFacetedMinMaxValues(...)`, grouped and flat row-model builders, `exportTableToCsv(...)` for headless CSV serialization of visible headers and rows, and pure state actions for sorting, grouping, expansion, visibility, sizing, and layout.
 
 Use `@typed-table/adapters` when you want composed local or remote table models without using the React hook. Its main exports are `createLocalAdapter` and `createRemoteAdapter`.
 
 The repository requires Node.js 22 or newer for development and release automation. Published package manifests intentionally do not declare a separate consumer Node engine range yet, because the packages target browser and bundler runtimes rather than direct Node execution.
 
-See [docs/packages.md](./docs/packages.md) for package-by-package examples, including local grouping with expandable grouped rows, local faceted filter metadata through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, column ordering and pinning, append-oriented remote loading for infinite scroll, the manual pattern for clearing hidden-column filters and sorting, and the optional remote include/exclude row-selection workflow with its `clearRowSelection()` reset pattern.
+See [docs/packages.md](./docs/packages.md) for package-by-package examples, including local grouping with expandable grouped rows, local faceted filter metadata through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, column ordering, pinning, and sizing, append-oriented remote loading for infinite scroll, the manual pattern for clearing hidden-column filters and sorting, and the optional remote include/exclude row-selection workflow with opt-in automatic query-scope resets. See [docs/virtualization.md](./docs/virtualization.md) for the current row/column virtualization guidance and why the repo does not ship a built-in helper yet.
 
 ## Getting Started
 
@@ -203,7 +205,7 @@ npm run release:publish
 ## Roadmap
 
 - Consider lower-priority features only after higher-value table-state work is settled.
-- Explore broader virtualization only if the current infinite-scroll example is not enough.
+- Broader virtualization guidance now lives in `docs/virtualization.md`; add runtime helpers only if repeated host integration pain justifies public API surface.
 - Explore server-backed grouping or faceting only after a concrete remote API shape exists.
 
 ## Contributing
@@ -212,6 +214,7 @@ npm run release:publish
 - Keep documentation aligned with committed code.
 - Preserve the package dependency direction.
 - Add or update examples when public API behavior changes.
+
 
 
 

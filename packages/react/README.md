@@ -15,6 +15,7 @@ npm install @typed-table/react react
 - `useTableContext`
 - typed column helpers re-exported from the core package
 - local and remote table workflows with partial controlled state support
+- headless column sizing state and resolved header/cell width metadata
 
 ## Example
 
@@ -71,15 +72,16 @@ export function UsersTable({ users }: { users: User[] }) {
 
 - `mode: "remote"` forwards pagination, sorting, and filters to your query function.
 - `remoteLoading: { mode: "append" }` supports append-oriented remote loading.
-- Optional dataset-level include/exclude selection is available through `remoteRowSelection`.
+- Optional dataset-level include/exclude selection is available through `remoteRowSelection`, including opt-in automatic resets when the remote query scope changes.
 
 ## Notes
 
 - Grouping, grouped-row expansion, and faceted metadata are currently local-table features.
-- Visibility, ordering, and pinning changes in remote mode stay local and do not refetch.
+- Visibility, ordering, pinning, and sizing changes in remote mode stay local and do not refetch.
 - Hidden columns do not automatically clear active sorting or filtering state.
 
 ## More
 
 - Repository: <https://github.com/SiriusBinaryDev/typed-table>
 - Package guide: <https://github.com/SiriusBinaryDev/typed-table/blob/main/docs/packages.md>
+- Virtualization guide: <https://github.com/SiriusBinaryDev/typed-table/blob/main/docs/virtualization.md>

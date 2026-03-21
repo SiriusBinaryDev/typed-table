@@ -15,7 +15,7 @@ npm install @typed-table/core
 - pure filtering, sorting, and pagination helpers
 - faceting helpers through `getFacetedUniqueValues(...)` and `getFacetedMinMaxValues(...)`
 - flat and grouped row-model builders
-- pure state actions for sorting, filters, grouping, expansion, visibility, ordering, and pinning
+- pure state actions for sorting, filters, grouping, expansion, visibility, ordering, pinning, and sizing
 
 ## Example
 
@@ -67,6 +67,7 @@ const rows = createRows(paged, {
 
 - `@typed-table/core` is side-effect free and does not depend on React.
 - Grouping and faceting are currently local-only concepts.
+- Headers and cells expose resolved `size`, `minSize`, `maxSize`, and `canResize` metadata from column definitions plus sparse `columnSizing` overrides.
 - Hidden columns do not automatically clear active sorting or filtering state.
 
 ## More

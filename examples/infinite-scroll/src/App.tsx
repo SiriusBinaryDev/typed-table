@@ -153,6 +153,9 @@ function InfiniteProfilesTable() {
         <p>
           Sorting still resets back to page one because it changes the remote query scope.
         </p>
+        <p>
+          This example is append loading, not DOM virtualization. If the accumulated row count becomes large, pair the same `table.rows` model with a row virtualizer so only the visible slice mounts.
+        </p>
       </section>
 
       <section className="infinite-panel infinite-table-card">
