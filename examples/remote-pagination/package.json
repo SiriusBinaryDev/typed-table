@@ -1,14 +1,14 @@
 {
   "name": "@typed-table/example-remote-pagination",
   "private": true,
-  "version": "0.1.2",
+  "version": "0.1.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build"
   },
   "dependencies": {
-    "@typed-table/react": "0.2.1",
+    "@typed-table/react": "0.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   }

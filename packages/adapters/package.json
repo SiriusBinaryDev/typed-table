@@ -1,6 +1,6 @@
 {
   "name": "@typed-table/adapters",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Data-source adapters for typed-table.",
   "license": "Apache-2.0",
   "type": "module",
@@ -34,7 +34,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@typed-table/core": "0.2.1"
+    "@typed-table/core": "0.2.2"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

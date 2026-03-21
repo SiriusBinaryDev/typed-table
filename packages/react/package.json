@@ -1,6 +1,6 @@
 {
   "name": "@typed-table/react",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "React integration package for typed-table.",
   "license": "Apache-2.0",
   "type": "module",
@@ -37,8 +37,8 @@
     "react": "^19.0.0"
   },
   "dependencies": {
-    "@typed-table/adapters": "0.2.1",
-    "@typed-table/core": "0.2.1"
+    "@typed-table/adapters": "0.2.2",
+    "@typed-table/core": "0.2.2"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
