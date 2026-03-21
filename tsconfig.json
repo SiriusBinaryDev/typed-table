@@ -1,0 +1,12 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/core" },
+    { "path": "./packages/react" },
+    { "path": "./packages/adapters" },
+    { "path": "./examples/basic-table" },
+    { "path": "./examples/filter-row-selection" },
+    { "path": "./examples/remote-pagination" }
+  ]
+}
+

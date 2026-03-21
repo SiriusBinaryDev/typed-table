@@ -1,0 +1,51 @@
+name: Bug report
+description: Report a reproducible defect in typed-table.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please provide a minimal reproduction and the exact package versions involved.
+  - type: input
+    id: packages
+    attributes:
+      label: Affected package(s)
+      description: Which package(s) are affected?
+      placeholder: "@typed-table/react 0.2.1"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Provide steps, code, or a minimal repo.
+      placeholder: |
+        1. Create table with ...
+        2. Call ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include framework, runtime, browser, and OS details when relevant.
+      placeholder: "React 19, TypeScript 5.5, Node 22, Chrome 134, Windows 11"
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add logs, screenshots, or related details.
+    validations:
+      required: false
