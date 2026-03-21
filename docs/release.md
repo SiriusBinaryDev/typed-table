@@ -60,6 +60,8 @@ npm run release:publish
 - `.changeset/config.json` uses `main` as the base branch.
 - Internal dependency updates are configured with `updateInternalDependencies: "patch"`.
 - `changeset status` expects normal commit history on `main`.
+- `.github/workflows/release.yml` is tag-driven on `v*`; it is intended to run after npm publish, not instead of npm publish.
+- `scripts/release/prepare-github-packages.mjs` builds temporary owner-scoped mirror manifests under `.github-packages/` for the GitHub Packages publish step.
 - The root `package.json` declares the repository's Node.js tooling floor.
 - Published package manifests intentionally omit package-level `engines` metadata until consumer runtime support is defined separately from repo tooling.
 - Vitest benchmark mode is currently experimental, so keep the Vitest version pinned when comparing benchmark output across releases.
