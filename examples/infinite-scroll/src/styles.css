@@ -1,0 +1,211 @@
+:root {
+  color: #182530;
+  background:
+    radial-gradient(circle at top right, rgba(255, 158, 117, 0.22), transparent 28%),
+    linear-gradient(180deg, #fff6ef 0%, #fffaf6 52%, #f5efe9 100%);
+  font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.infinite-example {
+  width: min(1120px, calc(100vw - 28px));
+  margin: 0 auto;
+  padding: 36px 0 56px;
+}
+
+.infinite-hero {
+  margin-bottom: 24px;
+}
+
+.infinite-eyebrow {
+  margin: 0 0 10px;
+  color: #bf5d22;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.74rem;
+}
+
+.infinite-example h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 4vw, 4.1rem);
+  line-height: 0.96;
+}
+
+.infinite-lede {
+  margin: 12px 0 0;
+  max-width: 50rem;
+  color: #5f645f;
+  line-height: 1.65;
+}
+
+.infinite-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.infinite-panel {
+  border: 1px solid rgba(104, 68, 41, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 24px 60px rgba(112, 79, 50, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.infinite-stats {
+  padding: 18px 22px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.infinite-stats strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.34rem;
+}
+
+.infinite-stat-label {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #7f6955;
+}
+
+.infinite-explainer {
+  padding: 20px 22px;
+  display: grid;
+  gap: 10px;
+}
+
+.infinite-explainer p {
+  margin: 0;
+  color: #635b55;
+  line-height: 1.6;
+}
+
+.infinite-table-card {
+  padding: 18px;
+}
+
+.infinite-scroll-shell {
+  max-height: 560px;
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(112, 79, 50, 0.1);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.infinite-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.infinite-table th,
+.infinite-table td {
+  padding: 16px 18px;
+  text-align: left;
+  border-bottom: 1px solid rgba(112, 79, 50, 0.08);
+}
+
+.infinite-table thead th {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 248, 242, 0.94);
+  backdrop-filter: blur(10px);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #7a6551;
+}
+
+.infinite-sortable {
+  cursor: pointer;
+}
+
+.infinite-heading-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infinite-sort-state {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffe6d5;
+  color: #b85a25;
+  font-size: 0.7rem;
+}
+
+.infinite-table tbody tr:hover {
+  background: rgba(255, 247, 239, 0.95);
+}
+
+.infinite-sentinel {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.infinite-status {
+  margin: 0;
+  color: #65574b;
+}
+
+.infinite-status.is-loading {
+  color: #b65a23;
+  font-weight: 600;
+}
+
+.infinite-status.is-error {
+  color: #bf4135;
+  font-weight: 600;
+}
+
+.infinite-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #3f2417;
+  color: #fff7f1;
+}
+
+.infinite-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 860px) {
+  .infinite-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .infinite-example {
+    width: min(100vw - 20px, 1120px);
+  }
+
+  .infinite-stats {
+    grid-template-columns: 1fr;
+  }
+}
