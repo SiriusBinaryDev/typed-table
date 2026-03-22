@@ -207,7 +207,7 @@ For non-React integrations, use [`@typed-table/adapters`](./packages/adapters) d
 ## Core principles
 
 1. **Separation of concerns**  
-   Types flow from your data to your UI.
+   Logic is independent from UI.
 
 2. **Explicit state model**  
    Table behavior is predictable and debuggable.
