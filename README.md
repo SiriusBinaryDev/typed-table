@@ -1,244 +1,297 @@
 # typed-table
 
-Headless, strongly typed table state engine for React and TypeScript.
+A headless, type-safe table state framework for React.
 
-## Overview
+Build complex data tables with reusable logic, predictable state and flexible data integration.
 
-- `typed-table` provides table logic, state, and data-flow primitives without shipping UI components.
-- The library is intended for developers who want reusable table architecture with strong TypeScript typing and React integration.
-- The current scaffold covers local and remote table workflows through separate packages.
+## 🧠 The problem
 
-## Features
+Most table libraries focus on rendering UI.
 
-- Framework-agnostic core package for:
-  - column definitions
-  - table state
-  - row and header models
-  - filtering, faceted filter-value metadata, multi-column sorting, pagination, grouping, row expansion, column visibility, column ordering, row ordering, column pinning, and column sizing state
-  - pure state transition helpers and grouped-row metadata for local tables
-- React package for:
-  - `useTable`
-  - `TableProvider`
-  - `useTableContext`
-  - re-exported `column`, `createColumns`, and `createColumnFactory`
-- Adapter package for:
-  - local data mode
-  - remote query mode with replace-or-append loading handled by the React hook, including optional server-backed grouping and faceting metadata
-- Example apps for:
-  - local basic table rendering with drag-and-drop row ordering, grouping, expandable grouped rows, column visibility controls, and host-rendered sizing controls
-  - focused filtering and row selection workflows
-  - remote pagination, sorting, grouping, faceting metadata, and optional dataset-level row selection
-  - append-oriented remote loading through a dedicated infinite-scroll demo
+But real-world tables are about:
+
+* managing state (sorting, pagination, filters)
+* handling data flows (local vs remote)
+* composing multiple components (toolbar, table, pagination)
+
+`typed-table` focuses on modeling those concerns — not just rendering them.
+
+## ⚡ Why typed-table
+
+* Strong TypeScript inference
+* Headless architecture (no UI constraints)
+* Reusable table state and logic
+* Works with any data source (REST, GraphQL, React Query)
+* Designed for complex applications
+
+## Install
+
+```bash
+npm install @typed-table/core @typed-table/adapters @typed-table/react react
+```
+
+Use `@typed-table/core` when you want the framework-agnostic engine, or `@typed-table/adapters` when you want local or remote pipeline composition without the React hook.
+
+## Quick example
+
+```tsx
+import { column, createColumns, useTable } from "@typed-table/react";
+
+type User = {
+  id: string;
+  name: string;
+  age: number;
+};
+
+const columns = createColumns<User>([
+  column("name", { header: "Name", sortable: true }),
+  column("age", { header: "Age", sortable: true }),
+]);
+
+const table = useTable<User>({
+  columns,
+  data: users,
+});
+```
+
+## Composition
+
+```tsx
+import { TableProvider } from "@typed-table/react";
+
+function UsersPage() {
+  return (
+    <TableProvider table={table}>
+      <UsersToolbar />
+      <UsersTable />
+      <UsersPagination />
+    </TableProvider>
+  );
+}
+```
+
+`typed-table` is built for composability. Each component can consume the same table instance through context with `useTableContext()`.
+
+## Demo / examples
+
+- [`examples/basic-table`](./examples/basic-table) for local sorting, filtering, grouping, row ordering, selection, visibility, and sizing
+- [`examples/filter-row-selection`](./examples/filter-row-selection) for context-driven composition, filtering, and selection workflows
+- [`examples/remote-pagination`](./examples/remote-pagination) for remote pagination, sorting, grouping, faceting, and dataset-level selection
+- [`examples/infinite-scroll`](./examples/infinite-scroll) for append-oriented remote loading
+
+## Get started
+
+### 1. Define your data
+
+```ts
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+};
+```
+
+### 2. Define columns
+
+```ts
+import { column, createColumns } from "@typed-table/react";
+
+const columns = createColumns<User>([
+  column("name", { header: "Name", sortable: true, filterable: true }),
+  column("email", { header: "Email", filterable: true }),
+  column("age", { header: "Age", sortable: true }),
+]);
+```
+
+### 3. Create the table
+
+```ts
+import { useTable } from "@typed-table/react";
+
+const table = useTable<User>({
+  columns,
+  data: users,
+  getRowId: (row) => row.id,
+});
+```
+
+### 4. Render the table
+
+```tsx
+import { useTableContext } from "@typed-table/react";
+
+function UsersTable() {
+  const table = useTableContext<User>();
+
+  return (
+    <table>
+      <thead>
+        <tr>
+          {table.headers.map((header) => (
+            <th key={header.id} onClick={() => table.sortBy(header.id)}>
+              {header.label}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {table.rows.map((row) => (
+          <tr key={row.id}>
+            {row.cells.map((cell) => (
+              <td key={cell.id}>{cell.render()}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+## Data adapters
+
+`typed-table` is data-source agnostic.
+
+You can integrate with:
+
+* REST APIs
+* GraphQL
+* React Query
+* Custom data sources
+
+### Example: server-side pagination
+
+```ts
+const table = useTable<User>({
+  columns,
+  mode: "remote",
+  getRowId: (row) => row.id,
+  query: async ({ pagination, sorting }) => {
+    const response = await fetch("/api/users", {
+      method: "POST",
+      body: JSON.stringify({
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+        sorting,
+      }),
+    });
+
+    const data = await response.json();
+
+    return {
+      rows: data.items,
+      total: data.total,
+    };
+  },
+});
+```
+
+### Example: React Query integration
+
+```ts
+const table = useTable<User>({
+  columns,
+  mode: "remote",
+  getRowId: (row) => row.id,
+  query: ({ pagination }) =>
+    queryClient.fetchQuery({
+      queryKey: ["users", pagination.page, pagination.pageSize],
+      queryFn: () => fetchUsers(pagination.page, pagination.pageSize),
+    }),
+});
+```
+
+For non-React integrations, use [`@typed-table/adapters`](./packages/adapters) directly.
+
+## Core principles
+
+1. **Separation of concerns**  
+   Types flow from your data to your UI.
+
+2. **Explicit state model**  
+   Table behavior is predictable and debuggable.
+
+3. **End-to-end type safety**  
+   Types flow from your data to your UI.
+
+## Packages
+
+- [`@typed-table/core`](./packages/core) → table engine (framework-agnostic)
+- [`@typed-table/react`](./packages/react) → React bindings
+- [`@typed-table/adapters`](./packages/adapters) → data integration layercomposition
 
 ## Architecture
 
-- `packages/core`
-  - framework-agnostic table engine
-  - owns types, state model, row/header builders, and pure pipeline functions
-- `packages/adapters`
-  - composes the core engine into local and remote data workflows
-- `packages/react`
-  - connects the engine to React state, async effects, and context distribution
-- `examples/*`
-  - consumer-facing usage examples built on top of the React package
+```text
+@typed-table/core
+        ↓
+@typed-table/react
+        ↓
+UI components
 
-Dependency direction:
-
-- `core` -> no React dependency
-- `adapters` -> `core`
-- `react` -> `core`, `adapters`
-- `examples` -> `react`
-
-## Tech Stack
-
-- Language: TypeScript
-- Framework: React
-- Example tooling: Vite
-- Testing: Vitest, Testing Library, jsdom
-- Package management: npm workspaces
-- Module format: ESM
-- Database: None
-
-## Project Structure
-
-- `packages/core/src/`
-  - table types, column helpers, state, pipeline functions, row-model builders, and pure actions
-- `packages/react/src/`
-  - React hook, context, provider, and package exports
-- `packages/adapters/src/`
-  - local and remote adapter implementations
-- `examples/basic-table/`
-  - local table example app
-- `examples/filter-row-selection/`
-  - focused filtering and row selection example app
-- `examples/remote-pagination/`
-  - remote query example app
-- `examples/infinite-scroll/`
-  - remote append-loading example app
-- `docs/packages.md`
-  - package-level API guide with examples for `core`, `react`, and `adapters`
-- `docs/release.md`
-  - release checklist and Changesets workflow
-- `docs/virtualization.md`
-  - guidance for row/column virtualization patterns with minimal React helpers and host-owned DOM windowing
-- `CONTRIBUTING.md`
-  - setup, workflow expectations, and pull request checklist
-
-## Package APIs
-
-Use `@typed-table/react` when building a React table UI. Its main exports are `useTable`, `TableProvider`, `useTableContext`, `column`, `createColumns`, `createColumnFactory`, `exportTableToCsv`, `getRowDropTargetIndex`, `reorderRowIds`, `partitionHeadersByPin`, `partitionRowCellsByPin`, and `getVirtualTableLayout` for strongly typed custom column callbacks, accessor columns with arbitrary string ids, headless CSV export of the current visible table model, and minimal virtualization-friendly layout derivation. The hook exposes partial controlled-state ownership through `state` and `onStateChange`, faceting through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, headless grouping and expansion state through `grouping`, `rowExpansion`, `toggleGrouping`, and `toggleRowExpanded`, grouped-row metadata on `table.rows`, headless column layout state through `columnOrder`, `rowOrder`, `columnPinning`, `columnSizing`, `setColumnOrder`, `moveColumn`, `setRowOrder`, `moveRow`, `setColumnPinning`, `setColumnSize`, `resizeColumn`, and `clearColumnSizing`, minimal row drag-and-drop helpers through `getRowDropTargetIndex(...)` and `reorderRowIds(...)`, plus header/cell sizing metadata for host-rendered layouts, opt-in append-oriented remote loading through `remoteLoading: { mode: "append" }`, and optional server-backed grouping/faceting contracts in remote mode.
-
-Use `@typed-table/core` when you need the framework-agnostic engine. Its main exports are the column helpers, `createColumnFactory`, the table state factory, controlled-state and faceting types, pipeline functions such as `getFacetedUniqueValues(...)`, `getFacetedMinMaxValues(...)`, and `applyRowOrder(...)`, grouped and flat row-model builders including `createRemoteGroupedRows(...)`, `exportTableToCsv(...)` for headless CSV serialization of visible headers and rows, and pure state actions for sorting, grouping, expansion, visibility, row ordering, sizing, and layout.
-
-Use `@typed-table/adapters` when you want composed local or remote table models without using the React hook. Its main exports are `createLocalAdapter` and `createRemoteAdapter`; the local adapter honors explicit row ordering before later local sorting or grouping, and the remote adapter can now normalize optional server-backed grouped rows plus faceting metadata.
-
-The repository requires Node.js 22 or newer for development and release automation. Published package manifests intentionally do not declare a separate consumer Node engine range yet, because the packages target browser and bundler runtimes rather than direct Node execution.
-
-See [docs/packages.md](./docs/packages.md) for package-by-package examples, including local grouping with expandable grouped rows, faceted filter metadata through `getFacetedUniqueValues(columnId)` and `getFacetedMinMaxValues(columnId)`, column ordering, row ordering, drag-and-drop row reorder helpers, pinning, sizing, the minimal virtualization helpers, server-backed remote grouping/faceting contracts, append-oriented remote loading for infinite scroll, the manual pattern for clearing hidden-column filters and sorting, and the optional remote include/exclude row-selection workflow with opt-in automatic query-scope resets. See [docs/virtualization.md](./docs/virtualization.md) for the current row/column virtualization guidance and the minimal React helper boundary.
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 22 or newer
-- npm
-
-### Install Dependencies
-
-Use Node.js 22 or newer for all workspace commands below.
-
-```bash
-npm install
+Data sources
+REST / GraphQL / React Query
+        ↓
+@typed-table/adapters
 ```
 
-### Build the Workspace
+## Comparison
 
-```bash
-npm run build
-```
+| Feature                      | typed-table | Traditional table components |
+| ---------------------------- | ----------- | ---------------------------- |
+| Headless                     | ✅         | ❌                           |
+| Type-safe                    | ✅         | ⚠️                           |
+| Data-source agnostic         | ✅         | ❌                           |
+| Composable across components | ✅         | ❌                           |
+| Scalable architecture        | ✅         | ❌                           |
 
-### Run the Basic Example
+## Use cases
 
-```bash
-npm run dev:basic
-```
+* SaaS dashboards
+* admin panels
+* analytics tools
+* data-heavy applications
 
-### Run the Filtering and Row Selection Example
+## Examples and docs
 
-```bash
-npm run dev:filter-selection
-```
-
-### Run the Remote Pagination Example
-
-```bash
-npm run dev:remote
-```
-
-### Run the Infinite Scroll Example
-
-```bash
-npm run dev:infinite-scroll
-```
-
-### Build the Example Apps
-
-```bash
-npm run build:examples
-```
-
-### Run Tests
-
-```bash
-npm test
-```
-
-### Run Core Benchmarks
-
-```bash
-npm run bench:core
-```
-
-Vitest benchmark mode is experimental in the current toolchain, so keep the Vitest version pinned when comparing benchmark output over time. The current core harness covers flat local pipeline, faceting, and grouped-row hotspots.
+- [`examples/basic-table`](./examples/basic-table)
+- [`examples/filter-row-selection`](./examples/filter-row-selection)
+- [`examples/remote-pagination`](./examples/remote-pagination)
+- [`examples/infinite-scroll`](./examples/infinite-scroll)
+- [`docs/packages.md`](./docs/packages.md)
+- [`docs/virtualization.md`](./docs/virtualization.md)
+- [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
 ## Development
 
-- Keep `packages/core` framework-agnostic.
-- Prefer pure functions and serializable state transitions in the core package.
-- Finalize typed column definitions with `createColumns<TData>([column(...)])`.
-- Use ESM imports and type-only exports/imports where appropriate.
-- Keep adapters focused on data-source composition, not UI concerns.
-- Keep React-specific state and side effects inside `packages/react`.
-- See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup and contribution workflow details.
-
-## Release Workflow
-
-- The repository uses Changesets for versioning and npm publication.
-- Pushing a version tag like `v0.2.2` now also creates a GitHub Release and publishes GitHub Packages mirror builds under the `@siriusbinarydev/*` scope.
-- Verify the workspace before a release:
+This repository uses npm workspaces and requires Node.js 22 or newer.
 
 ```bash
+npm install
 npm run build
 npm test
+```
+
+Run the example apps:
+
+```bash
+npm run dev:basic
+npm run dev:filter-selection
+npm run dev:remote
+npm run dev:infinite-scroll
+```
+
+Build all example apps:
+
+```bash
 npm run build:examples
 ```
 
-- Create a changeset for user-facing package changes:
-
-```bash
-npm run changeset
-```
-
-- Apply pending version updates:
-
-```bash
-npm run release:version
-```
-
-- Publish the packages:
-
-```bash
-npm run release:publish
-```
-
-- See [docs/release.md](./docs/release.md) for the full release sequence, the GitHub tag workflow, and the GitHub Packages mirror names.
-
-## Roadmap
-
-- Consider lower-priority features only after higher-value table-state work is settled.
-- Keep the React virtualization helper surface minimal and virtualizer-agnostic; only expand it if repeated host integration pain justifies more public API surface.
-- Refine the remote grouping/faceting contract only when real server workflows expose gaps in the current grouped-row or facet-metadata shape.
-
 ## Contributing
 
-- Follow [CONTRIBUTING.md](./CONTRIBUTING.md) for setup, workflow expectations, and pull request checks.
-- Keep documentation aligned with committed code.
-- Preserve the package dependency direction.
-- Add or update examples when public API behavior changes.
+Contributions are welcome. See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for setup, workflow expectations, and pull request checks.
 
+## License
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Apache-2.0
