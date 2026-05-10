@@ -15,6 +15,7 @@
     "exactOptionalPropertyTypes": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "paths": {
       "@typed-table/core": ["packages/core/src/index.ts"],
       "@typed-table/react": ["packages/react/src/index.ts"],
