@@ -1,15 +1,15 @@
 {
   "name": "@typed-table/example-infinite-scroll",
   "private": true,
-  "version": "0.1.5",
+  "version": "0.1.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build"
   },
   "dependencies": {
-    "@typed-table/react": "0.2.4",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@typed-table/react": "0.2.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }

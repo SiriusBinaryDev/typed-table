@@ -1,6 +1,6 @@
 {
   "name": "@typed-table/core",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "description": "Framework-agnostic core engine for typed-table.",
   "license": "Apache-2.0",
   "type": "module",
