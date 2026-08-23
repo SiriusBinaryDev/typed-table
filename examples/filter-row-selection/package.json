@@ -8,8 +8,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@typed-table/react": "0.2.5",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "@typed-table/react": "0.2.6",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   }
 }
