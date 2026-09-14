@@ -10,6 +10,6 @@
   "dependencies": {
     "@typed-table/react": "0.2.6",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.3.0"
   }
 }
